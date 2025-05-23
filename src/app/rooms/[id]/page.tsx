@@ -3,6 +3,32 @@ import { redirect } from "next/navigation";
 import { isValidObjectId } from "mongoose";
 import RoomClient from "./roomClient";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const params_ = await params;
+
+  if (!isValidObjectId(params_.id)) {
+    return {};
+  }
+
+  const roomFound = await prisma.room.findUnique({
+    where: { id: params_.id },
+    select: { name: true, description: true },
+  });
+
+  if (!roomFound) {
+    return {};
+  }
+
+  return {
+    title: roomFound.name,
+    description: roomFound.description,
+  };
+}
+
 export default async function RoomPage({
   params,
 }: {
